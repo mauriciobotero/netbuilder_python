@@ -45,3 +45,34 @@ if arguments.fields: # If user includes --fields, ensure schema only uses stated
             schema[field] = field_filler[field] # Add field name/type to new schema
         else:
             print(f"The '{field}' field is not an option.")
+
+def record_generation(schema): # function to generate fake record from schema
+    record = {} # start with empty dictionary
+    for field_name, field_type in schema.items(): # loop through each schema field and type
+        if isinstance(field_type, list): # if type is from a list
+            record[field_name] = generated.random_element(elements=field_type) # choose randomly from list
+        else:
+            if field_type == "name": # if field type is name
+                record[field_name] = generated.name() # generate a name, and so on
+            elif field_type == "date":
+                record[field_name] = str(generated.date_of_birth())
+            elif field_type == "number":
+                record[field_name] = str(generated.random_int(min=0, max=999999)).zfill(6)
+            elif field_type == "ip":
+                record[field_name] = generated.ipv4()
+            elif field_type == "boolean":
+                record[field_name] = generated.boolean()
+            else:
+                record[field_name] = None
+
+ 
+    if arguments.highlight_new_users: # if flag is used
+        pid_value = record.get("pid", "") #receive pid or not
+        if re.match(r"^9\d{5}$", pid_value): # if pid is present and starts with 9
+            name = record.get("name", "") # get name from record or not
+            if name:
+                print(f"New User! PID: {pid_value}, Name: {name}") # Message displayed with name
+            else:
+                print(f"New User! PID: {pid_value}") # Message displayed without name
+
+    return record # Return generated record after message
