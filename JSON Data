@@ -1,1 +1,47 @@
-Generated JSON Data
+import argparse # handles CLI arguments
+import json # handles working with JSON data
+import re # handles working with Regex
+from faker import Faker # handles working with Faker's library of fake data
+
+generated = Faker() # Instance for Faker to generate data
+parser = argparse.ArgumentParser() # Parser to read CLI arguments
+
+parser.add_argument("--count", "-c", type=int, default=5) # Records to generate
+parser.add_argument("--output", "-o", type=str) # Optional output file
+parser.add_argument("--format", "-f", type=str, choices=["json"], default="json") # Format of output (default: json)
+parser.add_argument("--schema", "-s", type=str) # Optional schema file to define field structure
+parser.add_argument("--fields", type=str, help="name,dob,pid,ip,verified,Priority") # Optional comma-separated list of fields
+parser.add_argument("--highlight-new-users", action="store_true") # Optional flag to enable PID check
+
+arguments = parser.parse_args() # Parses user provided arguments
+
+field_filler = { # (dictionary) Defines what each field should be generating
+    "name": "name",
+    "dob": "date",
+    "pid": "number",
+    "ip": "ip",
+    "verified": "boolean",
+    "priority": ["Urgent", "High", "Medium", "Low"]
+}
+
+schema = { # Default schema if no file or fields are provided in CLI
+    "name": "name",
+    "dob": "date",
+    "pid": "number",
+    "ip": "ip",
+    "verified": "boolean",
+    "Priority": ["Urgent", "High", "Medium", "Low"]
+}
+
+if arguments.schema: # only If user provides file, replace default schema with the provided file
+    with open(arguments.schema, "r") as f:
+        schema = json.load(f)
+
+if arguments.fields: # If user includes --fields, ensure schema only uses stated fields instead of every field
+    fields_list = [field.strip().lower() for field in arguments.fields.split(",")] # separate fields by commas, remove spaces, and convert to lowercase
+    schema = {} # reset schema
+    for field in fields_list: # for each field provided by user
+        if field in field_filler: # check if field is in field_filler
+            schema[field] = field_filler[field] # Add field name/type to new schema
+        else:
+            print(f"The '{field}' field is not an option.")
