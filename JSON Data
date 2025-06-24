@@ -76,3 +76,13 @@ def record_generation(schema): # function to generate fake record from schema
                 print(f"New User! PID: {pid_value}") # Message displayed without name
 
     return record # Return generated record after message
+
+records_list = [] # generates mutliple records, this is the list to hold records
+for i in range(arguments.count): # inputted count amount, generates x amount of records
+    records_list.append(record_generation(schema)) # Adds records to list
+
+if arguments.output: # Print to output file
+    with open(arguments.output, "w") as f: #Opens file to write to
+        f.write(json.dumps(records_list, indent=2)) # JSON is written neatly to file
+else: # Or, print JSON to terminal
+    print(json.dumps(records_list, indent=2))
